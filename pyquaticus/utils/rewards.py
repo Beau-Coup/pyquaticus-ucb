@@ -73,11 +73,11 @@
 
             'agent_oob' (array): list of booleans (indexed in the order of agents list) where True means the
                                  agent is out-of-bounds (OOB), and False means the agent is not out-of-bounds
-                        
+
                         Ex. Usage: Check if agent is out-of-bounds
                         agent_id = 'agent_1'
                         num_oob = state['agent_oob'][agents.index(agent_id)]
-            
+
             'agent_has_flag' (array): list of booleans (indexed in the order of agents list) where True means the
                                      agent has a flag, and False means the agent does not have a flag
 
@@ -101,7 +101,7 @@
 
             'agent_tagging_cooldown' (array): current agent tagging cooldowns (indexed in the order of agents list)
                         Note: agent is able to tag when this value is equal to tagging_cooldown
-    
+
                         Ex. Usage: Get agent's current tagging cooldown
                         agent_id = 'agent_1'
                         cooldown = self.state['agent_tagging_cooldown'][agents.index(agent_id)]
@@ -114,7 +114,7 @@
             'flag_position' (array): list of flag homes (indexed by team number)
 
             'flag_taken' (array): list of booleans (indexed by team number) where True means the team's flag
-                                  is taken (picked up by an opponent), and False means the flag is not taken 
+                                  is taken (picked up by an opponent), and False means the flag is not taken
 
             'team_has_flag' (array): list of booleans (indexed by team number) where True means an agent of the
                                      team has a flag, and False means that no agents are in possesion of a flag
@@ -137,7 +137,7 @@
 
                 'lidar_labels' (dict):
             ######################################################################################
-            
+
             'obs_hist_buffer' (dict): Observation history buffer where the keys are agent_id's and values are the agents' observations
 
             'global_state_hist_buffer' (array): Global state history buffer
@@ -213,3 +213,46 @@ def caps_and_grabs(
     return reward
 
 ### Add Custom Reward Functions Here ###
+
+def retrieve(
+    agent_id: str,
+    team: Team,
+    agents: list,
+    agent_inds_of_team: dict,
+    state: dict,
+    prev_state: dict,
+    env_size: np.ndarray,
+    agent_radius: np.ndarray,
+    catch_radius: float,
+    scrimmage_coords: np.ndarray,
+    max_speeds: list,
+    tagging_cooldown: float
+):
+    reward = 0.0
+    team_id = int(team)
+    other_team_id = 1 - team_id
+
+    agent_pos = state["agent_position"][agents.index(agent_id)]
+    other_team_home_pos = state["flag_home"][other_team_id]
+
+    dist = np.linalg.norm(agent_pos - other_team_home_pos)
+
+    reward = -dist
+
+    return reward
+
+def zero(
+    agent_id: str,
+    team: Team,
+    agents: list,
+    agent_inds_of_team: dict,
+    state: dict,
+    prev_state: dict,
+    env_size: np.ndarray,
+    agent_radius: np.ndarray,
+    catch_radius: float,
+    scrimmage_coords: np.ndarray,
+    max_speeds: list,
+    tagging_cooldown: float
+):
+    return 0.0
