@@ -37,6 +37,7 @@ import logging
 import pprint
 
 from datetime import datetime
+import policies
 
 
 class RandPolicy(Policy):
@@ -72,6 +73,7 @@ class RandPolicy(Policy):
         pass
 
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a 1v1 policy in a 1v1 PyQuaticus environment')
     parser.add_argument('--render', help='Enable rendering', action='store_true')
@@ -92,6 +94,8 @@ if __name__ == '__main__':
     config_dict['tagging_cooldown'] = 60
     config_dict['tag_on_oob']=True
 
+    # config_dict['normalize_obs'] = False # Added for testing -- Neelay
+
     env_creator = lambda config: pyquaticus_v0.PyQuaticusEnv(config_dict=config_dict,render_mode=RENDER_MODE, reward_config=reward_config, team_size=1)
     env = ParallelPettingZooWrapper(pyquaticus_v0.PyQuaticusEnv(config_dict=config_dict,render_mode=RENDER_MODE, reward_config=reward_config, team_size=1))
     register_env('pyquaticus', lambda config: ParallelPettingZooWrapper(env_creator(config)))
@@ -109,7 +113,7 @@ if __name__ == '__main__':
         #else:
         #    return "easy-attack-policy"
 
-    policies = {'agent-0-policy':(None, obs_space, act_space, {}),
+    policies = {'agent-0-policy':(policies.NaiveRetrieve, obs_space, act_space, {}),
                 # 'agent-1-policy':(None, obs_space, act_space, {}),
                 'random':(RandPolicy, obs_space, act_space, {})}
                 #Examples of Heuristic Opponents in Rllib Training (See two lines below)
@@ -122,7 +126,12 @@ if __name__ == '__main__':
         .environment(env='pyquaticus')
         .env_runners(num_env_runners=12, num_cpus_per_env_runner=0.25)
         # .evaluation(evaluation_num_env_runners=1, evaluation_interval=1)
-        .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn, policies_to_train=["agent-0-policy"],)
+        .multi_agent(
+            policies=policies,
+            policy_mapping_fn=policy_mapping_fn,
+            # policies_to_train=["agent-0-policy"]
+            policies_to_train=[]
+        )
         .resources(num_gpus=1)
     )
     #If your system allows changing the number of rollouts can significantly reduce training times (num_rollout_workers=15)

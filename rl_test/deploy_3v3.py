@@ -52,7 +52,7 @@ RENDER_MODE = 'human'
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Deploy a trained policy in a 2v2 PyQuaticus environment')
     parser.add_argument('policy_one', help='Please enter the path to the model you would like to load in Ex. ./ray_test/checkpoint_00001/policies/agent-0-policy')
-    parser.add_argument('policy_two', help='Please enter the path to the model you would like to load in Ex. ./ray_test/checkpoint_00001/policies/agent-1-policy') 
+    parser.add_argument('policy_two', help='Please enter the path to the model you would like to load in Ex. ./ray_test/checkpoint_00001/policies/agent-1-policy')
     parser.add_argument('policy_three', help='Please enter the path to the model you would like to load in Ex. ./ray_test/checkpoint_00001/policies/agent-2-policy')
     reward_config = {}
     args = parser.parse_args()
@@ -66,9 +66,9 @@ if __name__ == '__main__':
 
     #Create Environment
     env = pyquaticus_v0.PyQuaticusEnv(config_dict=config_dict,render_mode='human',reward_config=reward_config, team_size=3)
-    
+
     obs,_ = env.reset()
-    
+
     #Ex. Load in Heurisitc
     #H_one = BaseDefender('agent_0', Team.RED_TEAM, mode='easy')
     #H_two = BaseAttacker('agent_1', Team.RED_TEAM, mode='easy')
@@ -89,10 +89,14 @@ if __name__ == '__main__':
         zero = policy_one.compute_single_action(obs['agent_0'])[0]
         one = policy_two.compute_single_action(obs['agent_1'])[0]
         two = policy_three.compute_single_action(obs['agent_2'])[0]
+        # Need the extra indexing for the NoLearningPolicies idk why
+        # zero = policy_one.compute_single_action(obs['agent_0'])[0][0]
+        # one = policy_two.compute_single_action(obs['agent_1'])[0][0]
+        # two = policy_three.compute_single_action(obs['agent_2'])[0][0]
         #Ex. Compute Heuristic agent actions
         #two = H_one.compute_action(new_obs)
         #three = H_two.compute_action(new_obs)
-        
+
         #Step the environment
         #Opponents Don't Move:
         obs, reward, term, trunc, info = env.step({'agent_0':zero,'agent_1':one, 'agent_2':two, 'agent_3':-1, 'agent_4':-1, 'agent_5':-1})
@@ -103,5 +107,3 @@ if __name__ == '__main__':
         if term[k[0]] == True or trunc[k[0]]==True:
             obs,_ = env.reset()
     env.close()
-
-

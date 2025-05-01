@@ -62,6 +62,9 @@ if __name__ == '__main__':
     config_dict['tagging_cooldown'] = 55
     config_dict['tag_on_oob']=True
 
+    # Pyquaticus is broken.. the following line breaks the environment
+    # config_dict['normalize_obs'] = False # Added for testing -- Neelay
+
     #Create Environment
     env = pyquaticus_v0.PyQuaticusEnv(config_dict=config_dict,render_mode='human',reward_config=reward_config, team_size=1)
 
@@ -81,7 +84,8 @@ if __name__ == '__main__':
             new_obs[k] = env.agent_obs_normalizer.unnormalized(obs[k])
 
         #Get learning agent action from policy
-        zero = policy_one.compute_single_action(obs['agent_0'])[0]
+        zero = policy_one.compute_single_action(obs['agent_0'])[0][0]
+        # zero = policy_one.compute_single_action(obs['agent_0'])[0]
         #Compute Heuristic agent actions
         # two = H_one.compute_action(new_obs)
         # three = H_two.compute_action(new_obs)
